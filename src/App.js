@@ -8,6 +8,7 @@ const initialItems = [
 
 export default function App() {
   const [items, setItems] = useState(initialItems);
+  const numItems = items.length;
 
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
@@ -34,7 +35,7 @@ export default function App() {
         onDeleteItem={handleDeleteItem}
         onToggleItem={handleToggleItem}
       />
-      <Stats />
+      <Stats items={items} />
     </div>
   );
 }
@@ -91,10 +92,25 @@ function Form({ onAddItems }) {
 }
 
 function PackingList({ items, onDeleteItem, onToggleItem }) {
+  const [sortBy, setSortBy] = useState("input");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+
+  if (sortBy === "quantity")
+    // 数量順
+    sortedItems = items.slice().sort((a, b) => a.quantity - b.quantity);
+
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed)); // 完了順
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             onDeleteItem={onDeleteItem}
@@ -103,6 +119,14 @@ function PackingList({ items, onDeleteItem, onToggleItem }) {
           />
         ))}
       </ul>
+
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">入力順</option>
+          <option value="quantity">数量順</option>
+          <option value="packed">完了順</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -123,10 +147,24 @@ function Item({ item, onDeleteItem, onToggleItem }) {
   );
 }
 
-function Stats() {
+function Stats({ items }) {
+  if (!items.length)
+    return (
+      <p className="stats">
+        <em>さあ、旅行の準備をしよう！持ち物を追加してね✈️</em>
+      </p>
+    );
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const percentage = Math.round((numPacked / numItems) * 100);
+
   return (
     <footer className="stats">
-      <em>🎒 持ち物リストはX個で、準備完了した持ち物はX(X%)個です。</em>
+      <em>
+        {percentage === 100
+          ? "🎉 すべての持ち物の準備が完了しました！😄"
+          : `🎒 持ち物リストは${numItems}個で、準備完了した持ち物は${numPacked}個 (${percentage}%)です。`}
+      </em>
     </footer>
   );
 }
