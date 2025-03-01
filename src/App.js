@@ -26,6 +26,10 @@ export default function App() {
     );
   }
 
+  function handleClearList() {
+    if (window.confirm("リストを削除しますか？")) setItems([]);
+  }
+
   return (
     <div className="app">
       <Logo />
@@ -34,6 +38,7 @@ export default function App() {
         items={items}
         onDeleteItem={handleDeleteItem}
         onToggleItem={handleToggleItem}
+        onClearList={handleClearList}
       />
       <Stats items={items} />
     </div>
@@ -91,7 +96,7 @@ function Form({ onAddItems }) {
   );
 }
 
-function PackingList({ items, onDeleteItem, onToggleItem }) {
+function PackingList({ items, onDeleteItem, onToggleItem, onClearList }) {
   const [sortBy, setSortBy] = useState("input");
 
   let sortedItems;
@@ -126,6 +131,10 @@ function PackingList({ items, onDeleteItem, onToggleItem }) {
           <option value="quantity">数量順</option>
           <option value="packed">完了順</option>
         </select>
+        <button onClick={() => setSortBy("input")}>入力順</button>
+        <button onClick={() => setSortBy("quantity")}>数量順</button>
+        <button onClick={() => setSortBy("packed")}>完了順</button>
+        <button onClick={onClearList}>リスト削除</button>
       </div>
     </div>
   );
